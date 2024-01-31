@@ -1,0 +1,379 @@
+%% Dokumentklasse
+\documentclass[a4paper, 12pt]{scrreprt}
+% Layout
+\usepackage[left=4.0cm, right=2.0cm, bottom=3.5cm]{geometry}
+\usepackage[onehalfspacing]{setspace}
+
+
+% ======================              Packages             ======================
+
+% Dokumentinformationen
+\usepackage[
+     pdftitle={Hochschul-App},
+     pdfsubject={},
+     pdfauthor={Dennis Brysiuk, Noah Lehmann},
+     pdfkeywords={},
+     pdftex=true,
+     colorlinks=true,
+     breaklinks=true,
+     citecolor=black,
+     linkcolor=black,
+     menucolor=black,
+     urlcolor=black
+]{hyperref}
+
+% Standart Packages
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{graphicx, subfigure}
+\graphicspath{{images/}}
+\usepackage{fancyhdr}
+\usepackage{lmodern}
+
+\usepackage{color}
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+\definecolor{light-gray}{gray}{0.95}
+
+\usepackage{transparent}
+% Schriftzeichen
+\usepackage{mathptmx} % Times
+
+%Anhang PDFs
+\usepackage[final]{pdfpages}
+
+% nicht einrücken nach Absatz
+\setlength{\parindent}{0pt}
+
+
+% ======================          Kopf- und Fußzeile       ======================
+
+\pagestyle{fancy}
+% Kopfzeile
+\lhead{}
+\chead{}
+\rhead{\slshape \leftmark}
+% Fußzeile
+\lfoot{}
+\cfoot{}
+\rfoot{\thepage}
+%% Einstellungen
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ======================          Literaturverzeichnis       ======================
+
+\usepackage[
+   backend=bibtex8,
+   style=authoryear,
+   bibstyle=authoryear,
+   autocite=footnote,
+   isbn=false, % Verhindert die Ausgabe der ISBN
+%   minnames=1, % Standardeinstellungen
+%   maxnames=3, % Standardeinstellungen
+   maxbibnames=99, % Betrifft nur die Bibliographie
+   firstinits=true
+]{biblatex}
+
+% Semikolon zwischen den Autoren
+\renewcommand*{\multinamedelim}{\addsemicolon\space}
+
+% Doppelpunkt nach Jahresangabe in Klammern im Literaturverzeichnis
+\renewcommand*{\labelnamepunct}{\addcolon\addspace}
+
+%Fettschrift autoryear Literaturverzeichnis
+\usepackage{xpatch}
+\xpretobibmacro{author}{\mkbibbold\bgroup}{}{}
+\xapptobibmacro{author}{\egroup}{}{}
+%Fettschrift Webseitentitel
+\xpretobibmacro{labeltitle}{\begingroup\bfseries}{}{}
+\xapptobibmacro{labeltitle}{\endgroup}{}{}
+
+
+\xpretobibmacro{bbx:editor}{\mkbibbold\bgroup}{}{}
+\xapptobibmacro{bbx:editor}{\egroup}{}{}
+%Fettschrift Webseitetitel
+
+
+%Kein Punkt am Ende von Literaturverzeichnises
+\renewcommand*{\finentrypunct}{\addspace}
+
+\renewcommand*{\finalnamedelim}{\multinamedelim}
+
+% Titel im Literaturverzeichnis nicht kursiv
+\DeclareFieldFormat{title}{#1\isdot}
+
+\DeclareFieldFormat{citetitle}{#1}
+\DeclareFieldFormat{journaltitle}{#1}
+\DeclareFieldFormat{issuetitle}{#1}
+\DeclareFieldFormat{maintitle}{#1}
+\DeclareFieldFormat{booktitle}{#1}
+
+
+\newbibmacro*{cite:labelyear+extrayear}{%
+  \iffieldundef{labelyear}
+    {}
+    {\printtext[parens]{\printtext[bibhyperref]{%
+       \printfield{labelyear}%
+       \printfield{extrayear}}}}}
+
+       \newbibmacro*{cite:parens:labelyear+extrayear}{%
+  \iffieldundef{labelyear}
+    {}
+    {\printtext[parens]{\printtext[bibhyperref]{%
+       \printfield{labelyear}%
+       \printfield{extrayear}}}}}
+
+\renewbibmacro*{cite}{%
+  \iffieldundef{shorthand}
+    {\ifthenelse{\ifnameundef{labelname}\OR\iffieldundef{labelyear}}
+       {\usebibmacro{cite:label}%
+        \setunit{\addspace}}
+       {\printnames{labelname}%
+        \setunit{\nameyeardelim}}%
+     \usebibmacro{cite:parens:labelyear+extrayear}}
+    {\usebibmacro{cite:shorthand}}}
+
+
+
+\renewcommand*{\mkbibnamegiven}[1]{%
+\ifitemannotation{corresponding}
+{\textbf{#1}}
+{#1}}
+\renewcommand*{\mkbibnamefamily}[1]{%
+\ifitemannotation{corresponding}
+{\textbf{#1}}
+{#1}}
+
+\DeclareFieldFormat{biblabeldate}{\mkbibbold{\mkbibparens{#1}}}
+\bibliography{Literatur/Literatur.bib} % or
+
+
+% ====================== Package Einstellungen & Sonstiges ======================
+
+% Besondere Trennungen
+\hyphenation{}
+
+% Römische Aufzählungen mit \RM{Zahl}
+\newcommand{\RM}[1]{\MakeUppercase{\romannumeral #1}}
+
+\usepackage[pdftex,dvipsnames]{xcolor}
+\newcommand\marker[1]{\textcolor{red}{#1}}
+
+\newcommand{\pictureWidth}{12}
+\usepackage{float}
+
+% TODO Notes
+\usepackage{todonotes}
+
+% Beispiele für Nutzung
+
+%\todo{default to-do}This is text that needs some attention.\\
+%\todo[inline]{Default inline to-do}
+%\todo[inline, color=green]{Green inline to-do}
+%\todo[inline, color=green!40]{Light green inline to-do}
+%\todo[inline, color=red]{Red inline to-do}
+%\todo[inline, color=red!40]{Light red inline to-do}
+
+%Tabelle Bsp
+%\begin{table}[H]
+%\begin{tabularx}{\textwidth}{|p{0.25\textwidth}|p{\textwidth-0.307\textwidth}|}
+%\hline
+%\textbf{Kapselung}				& Die Einbindung der Microservices erfolgt über Webservice-Light-Tenchologie, auch bekannt als REST. Wobei \\
+%&\\ \hline
+%\textbf{Lose Kopplung}			& 0.1\\
+%&\\ \hline
+%\textbf{Modularisierung}			& 0.6\\
+%&\\ \hline
+%\textbf{Layering}				& 4.00\\
+%&\\ \hline
+%\end{tabularx}
+%\caption[Tabelle]{Prinzipien}
+%\label{tab:prinzipien}
+%\end{table}
+
+\usepackage{acronym}
+\usepackage{amsmath}
+\usepackage{breqn}
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{pdflscape}
+\usepackage{lscape} % querformat
+\usepackage{longtable}
+\usepackage{tabulary}
+\usepackage{listings}
+\lstset{language=Java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{pgreen},
+  keywordstyle=\color{pblue},
+  stringstyle=\color{pred},
+  basicstyle=\footnotesize\ttfamily, 
+numbers=left,
+numberstyle=\tiny\color{black},
+xleftmargin=2em,
+framesep=0pt,
+framexleftmargin = 2em,
+framexrightmargin = 0.6em,
+backgroundcolor = \color{light-gray},
+  moredelim=[il][\textcolor{pgrey}]{$ $},
+  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, skip=-3pt}
+
+\usepackage{color, colortbl}
+\definecolor{Gray}{gray}{0.45}
+\definecolor{LGray}{gray}{0.9}
+
+% ======================          Dokumentbeginn           ======================
+
+\begin{document}
+% Seiten ohne Kopf- und Fußzeile sowie Seitenzahl
+\pagestyle{empty}
+\include{Titelpage}
+
+\newgeometry{left=4cm, right=3cm, bottom=3cm}
+
+% Beendet eine seite und erzwingt auf den nachfolgenden seiten die Ausgabe aller Gleitobjekte (z.B. Abbildungen), die bislang definiert, aber noch nicht ausgegeben wurden. dieser Befehl fügt, falls nötig, eine leere Seite ein, sodaß die nächste Seite nach den Gleitobjekten eine ungerade Seitennummer hat.
+\cleardoubleoddpage
+
+% Seitennummerierung neu begin\usepackage[''Optionen'']{acronym}nen, Zahlen [arabic], röm. Zahlen [roman,Roman], Buchstaben [alph, Alph]
+\pagenumbering{Roman}
+
+%\newpage
+%\include {Danksagung}
+%\include {Zusammenfassung}
+
+\newpage
+\pagestyle{fancy}
+
+%Abstand nach oben nach Kapitel kleiner
+\renewcommand*{\chapterheadstartvskip}{\vspace*{0cm}}
+
+% Inhaltsverzeichnis
+\tableofcontents
+
+%Verzeichnisse römisch gezählt
+\renewcommand{\thechapter}{\Roman{chapter}}
+
+% Verzeichnis aller Bilder
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+% Verzeichnis aller Tabellen
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
+%Codeverzeichnis
+\cleardoublepage
+\renewcommand\lstlistingname{Code}
+\renewcommand\lstlistlistingname{Codeverzeichnis}
+\addcontentsline{toc}{chapter}{\lstlistlistingname}
+\lstlistoflistings
+
+%Abkürzungsverzeichnis
+\cleardoublepage
+\addcontentsline{toc}{chapter}{Abkürzungsverzeichnis}
+\chapter*{Abkürzungsverzeichnis}
+\begin{acronym}[1234567890123456]
+\acro{API}{Application Programming Interface}
+\acro{App}{Applikation}
+\acroplural{App}[Apps]{Applikationen}
+\acro{CD}{Continuous Deployment}
+\acro{CI}{Continuous Integration}
+\acro{CORS}{Cross-Origin Resource Sharing}
+\acro{DAO}{Data Access Object}
+\acroplural{DAO}[DAOs]{Data Access Objects}
+\acro{DBMS}{Database Management System}
+\acroplural{DBMS}[DBMS]{Database Management Systems}
+\acro{DDoS}{Distributed Denial of Service}
+\acro{DoS}{Denial of Service}
+\acro{EE}{Enterprise Edition}
+\acro{FCM}{Firebase Cloud Messaging}
+\acro{HATEOAS}{Hypermedia As The Engine Of Application State}
+\acro{HTML}{Hypertext Markup Language}
+\acro{HTTPS}{Hypertext Transfer Protocol (Secure)}
+\acro{HTTP}{Hypertext Transfer Protocol}
+\acro{IDE}{Integrated Development Environment}
+\acro{JAX-RS}{Java \ac{API} for \ac{REST}ful Web Services}
+\acro{JDBC}{Java Database Connectivity}
+\acro{JPA}{Java Persistence \ac{API}}
+\acro{JS}{JavaScript}
+\acro{JSON}{Javascript Object Notation}
+\acro{JVM}{Java Virtual Machine}
+\acro{kB}{Kilobyte}
+\acro{LOC}{Line of Code}
+\acroplural{LOC}[LOC]{Lines of Code}
+\acro{OSS}{Open Source Software Center}
+\acro{PC}{Personal Computer}
+\acro{PHP}{Hypertext Pre-Processor}
+\acro{POJO}{Plain Old Java Object}
+\acroplural{POJO}[POJOs]{Plain Old Java Objects}
+\acro{PYPL}{Popularity of Programming Language Index}
+\acro{REST}{Representational State Transfer}
+\acro{SDK}{Software Development Kit}
+\acro{SQL}{Structured Query Language}
+\acro{URL}{Uniform Resource Locator}
+\acro{XML}{Extensible Markup Language}
+\acro{YAML}{YAML Ain't [sic]! Markup Language (ursprünglich \textit{Yet Another Markup Language})}
+\\
+\end{acronym}
+
+%Kapitel zaehlen wieder arabisch
+\renewcommand{\thechapter}{\arabic{chapter}}
+\setcounter{chapter}{0}
+
+%Abstand nach oben nach Kapitel wieder etwas mehr
+\renewcommand*{\chapterheadstartvskip}{\vspace*{2cm}}
+
+\newpage
+% Seitennummerierung neu beginnen, Zahlen [arabic], röm. Zahlen [roman,Roman], Buchstaben [alph, Alph]
+\pagenumbering{arabic}
+% pagestyle für gesamtes Dokument aktivieren
+\pagestyle{fancy}
+
+\newpage
+\include{Kapitel/01_Kapitel/01_Einleitung}
+\include{Kapitel/02_Kapitel/02_Vorgehensweise}
+\include{Kapitel/03_Kapitel/03_Technologien}
+\include{Kapitel/04_Kapitel/04_Configuration}
+\include{Kapitel/05_Kapitel/05_Envirements}
+\include{Kapitel/06_Kapitel/06_Documentation}
+\include{Kapitel/07_Kapitel/07_Testing}
+\include{Kapitel/08_Kapitel/08_Probleme}
+\include{Kapitel/09_Kapitel/09_Weiterentwicklung}
+\include{Kapitel/10_Kapitel/10_Ausblick_Fazit}
+
+\pagestyle{plain}
+
+%Verzeichnisse römisch gezählt
+\renewcommand{\thechapter}{\Roman{chapter}}
+\cleardoublepage
+
+\include{Kapitel/Anhang/Anhang}
+
+%Abstand Verzeichnisse
+\renewcommand*{\chapterheadstartvskip}{\vspace*{0cm}}
+
+%Literaturverzeichnis
+\cleardoublepage
+\printbibliography[heading=bibintoc,nottype=online,title={Literaturverzeichnis}]
+\cleardoublepage
+\printbibliography[type=online,title={Internetquellen}]
+
+\include{Kapitel/Erklaerung/Erklaerung}
+
+\end{document}

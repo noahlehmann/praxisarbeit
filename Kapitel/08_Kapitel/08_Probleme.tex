@@ -1,0 +1,79 @@
+\chapter{Probleme}
+\label{sec:probleme}
+
+Da im Verlaufe des Projektes zur Implementierung des Prototypen der neuen Hoch\-schul-\ac{App} ebenfalls Probleme aufgetreten sind, deren Ursache nicht oder nur schwer zu beseitigen waren wird im folgenden Kapitel genauer betrachtet, welche Schwierigkeiten in der Entwicklungsphase gefunden wurden und wie sich der endgültige Prototyp aufgrund dieser Schwierigkeiten von der geplanten Version unterscheidet. Im Allgemeinen sind zwei schwerwiegende Probleme aufgetreten, deren Lösung den Rahmen der Abschlussarbeit deutlich sprengen würden, weshalb sie hier nur dokumentiert wurden. Das erste ist die kontinuierliche Integration des Source Codes in den laufenden Serverbetrieb. Das zweite ist die Implementierung der \ac{HATEOAS}-Funktionen des Web-Servers. Das letzte Problem betrifft weniger die Implementierung selbst, da die betroffene Funktion des Notification Services durchaus umgesetzt wurde. Es betrifft lediglich die Nutzung dieser Funktion.
+
+\section{Kontinuierliche Integration und Deployment}
+
+Kontinuierliche Integration ist ein Konzept aus dem Software Engineering, welches es ermöglicht, Änderungen am Programmcode und neue Funktionen schnellstmöglich und ohne manuellen betriebenen Aufwand in die Entwicklungsumgebung des laufenden Servers zu übernehmen. Hierbei wird der aktuelle Source Code in der Regel durch ein Versionsverwaltungstool aktuell gehalten, Änderungen an diesem können dann in festgelegten Intervallen in den Programmcode übernommen werden, der bereits auf dem Server läuft und automatisch deployed werden, um danach den Server - falls nötig - neu zu starten. Ein solcher Vorgang kann zu Zeiten mit niedriger Serverauslastung durchgeführt werden, um den laufenden Betrieb unter Last nicht zu stören.
+
+\subsection*{Kontinuierliche Integration}
+
+\ac{CI} ist die automatische Übernahme von neuem, getesteten Source Code in die Code-Version, die bereits auf dem Server läuft. Hierbei können Entwickler jederzeit Änderungen am Code übernehmen, diese testen und anschließend einen Integrationsprozess anstoßen, wenn genug Änderungen vorhanden sind. Bei diesem Prozess wird der aktualisierte Source Code auf dem Server hinterlegt, um für den Schritt des kontinuierlichen Deployments zur Verfügung zu stehen.
+
+\subsection*{Kontinuierliche Bereitstellung}
+
+\ac{CD} ist ein Konzept, das in der Regel Hand in Hand mit \ac{CI} geht. Wie bereits erwähnt können Entwickler den auf dem Server liegenden Source Code jederzeit durch \ac{CI} aktualisieren, um ihn anschließend mit \ac{CD} auf dem Server zu deployen. Dabei ist die Idee hinter dem \ac{CD} in der Regel, dass das Deployment weitgehend automatisiert abläuft und entweder nur von einem Entwickler angestoßen oder durch einen festgelegten Zeitplan ausgeführt wird.
+
+\subsection*{Jenkins}
+
+Das Konzept des \ac{CI}/\ac{CD} ist eine Idee, die durch viele verschiedene Lösungen realisiert werden kann. Darunter zählen unter anderem das in GitLab integrierte \ac{CI}/\ac{CD}-Modul und \textit{Jenkins}. Viele andere Lösungen haben sich in den vergangenen Jahren zwar durchaus bewährt, sind aber durch teure Lizenzen mit hohen Kosten verbunden und deshalb keine Option für dieses Projekt.\\
+\linebreak
+Aus diesem Grund wurde die Umsetzung der Funktionalitäten rund um \textit{Jenkins} geplant, da \textit{Jenkins} eine open-source Lösung ist, welche im vollen Umfang für die Hochschul-\ac{App} nutzbar ist. \textit{Jenkins} ist ein ein Java basiertes Programm, welches auf jedem beliebigen System verwendbar ist. Durch die Anbindungsmöglichkeit verschiedenster Plugins ist es ebenfalls frei erweiterbar und äußerst flexibel. Es wurden durch die verbreitete Nutzung und die Starke Community von \textit{Jenkins} bereits zahlreiche, frei nutzbare Features veröffentlicht. Zudem stellt \textit{Jenkins} ein web-basiertes Interface zur Verfügung, durch welches die Build- und Deployment-Konfigurationen eingestellt und ausgeführt werden können. Einige der Stärken des Frameworks sind die automatisierte Ausführung von Tests in Echtzeit, der Möglichkeit einer Remote-Verwaltung und die Möglichkeit der Verteilung von User-Rollen.\\
+\linebreak
+Leider konnte diese Funktion nicht implementiert werden, da die vollständige Einrichtung dieser Software weit führende Vorbereitungen benötigt hätte. Dazu gehören die Verteilung von Administrationsrechten am Server, an dem \textit{Jenkins} ausgerollt werden soll, was bei der Arbeit mit Studierenden häufig Probleme verursacht. Diese Rechte werden für die Installation der Software, aber auch zur Konfiguration des Servers im Allgemeinen gebraucht. Zudem werden Server Zertifikate benötigt, die die Kommunikation des Servers mit den Remote-Usern und dem Applikaitons-Servern verschlüsseln. Allen voran scheitert diese Funktion jedoch am schieren Umfang der Einrichtung, die nahe an der eigentlichen Implementierung des Prototypen herankommen würde.\\
+\linebreak
+Deshalb hat sich das Entwicklerteam dazu entschieden, die Möglichkeit einer kontinuierlichen Bereitstellung aktueller Software zu dokumentieren und die aktuell am besten geeignete Software dafür vorzuschlagen. Aus den beschriebenen Problemen können spätere Entwickler die nötigen Schlüsse ziehen, um bei der Vorbereitung zur Umsetzung dieser Funktion auf keine unvorhergesehenen Probleme zu stoßen.
+
+\section{Hypermedia}
+
+In der parallel zu dieser Arbeit angefertigten Bachelorarbeit wurde ausführlich analysiert, warum \ac{HATEOAS} eine sinnvolle Erweiterung für den Funktionsumfang des Prototypen der neuen Hochschul-\ac{App} sein kann. Aufgrund der Konfiguration und der Zusammenstellung der verwendeten Bibliotheken ist es aber derzeit nicht möglich, das in Kapitel \ref{sec:dependencies} beschriebene \ac{HATEOAS}-Framework einzubinden, da sich bei der Initialisierung der \textit{Spring Beans} die Abhängigkeiten des \textit{Spring-Fox}-Frameworks mit den benötigten Abhängigkeiten des \ac{HATEOAS}-Frameworks überschneiden. Da beide Frameworks eine eigene \textsc{PluginRegistry} verwenden, kann \textit{Spring Boot} zur Laufzeit nicht bestimmen, welche der beiden Registries verwendet werden soll. Der produzierte Fehler sieht dann bei Programmstart wie folgt aus:
+
+\newpage
+\begin{lstlisting}[caption={PluginRegistry Bean Konflikt}]
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of method linkDiscoverers in org.springframework.hateoas.config.HateoasConfiguration required a single bean, but 17 were found:
+  - modelBuilderPluginRegistry: defined in null
+  - modelPropertyBuilderPluginRegistry: defined in null
+  - typeNameProviderPluginRegistry: defined in null
+  - syntheticModelProviderPluginRegistry: defined in null
+  - documentationPluginRegistry: defined in null
+  - apiListingBuilderPluginRegistry: defined in null
+  - operationBuilderPluginRegistry: defined in null
+  - parameterBuilderPluginRegistry: defined in null
+  - expandedParameterBuilderPluginRegistry: defined in null
+  - resourceGroupingStrategyRegistry: defined in null
+  - operationModelsProviderPluginRegistry: defined in null
+  - defaultsProviderPluginRegistry: defined in null
+  - pathDecoratorRegistry: defined in null
+  - apiListingScannerPluginRegistry: defined in null
+  - relProviderPluginRegistry: defined by method 'relProviderPluginRegistry' in class path resource 
+      [org/springframework/hateoas/config/
+          HateoasConfiguration.class]
+  - linkDiscovererRegistry: defined in null
+  - entityLinksPluginRegistry: defined by method 'entityLinksPluginRegistry' in class path resource 
+      [org/springframework/hateoas/config/
+          WebMvcEntityLinksConfiguration.class]
+
+Action:
+
+Consider marking one of the beans as @Primary, updating the consumer to accept multiple beans, or using @Qualifier to identify the bean that should be consumed
+
+Process finished with exit code 0
+\end{lstlisting}
+
+\newpage
+Diese Framework Fehler sind in beiden Frameworks bekannt und werden jeweils in den Framework-Dokumentationen als eigene Issues geführt\autocites[Siehe][]{hateoas_issue}[Siehe][]{swagger_issue}. Ursprünglich wurde dieses Problem bei der Nutzung des \ac{HATEOAS}-Frameworks in Verbindung mit \textit{Spring} gefunden\autocite[Siehe][]{spring_issue}. Jedoch wurde dieser Fehler behoben, wobei die Lösung nun nur noch Fehler in der Nutzung von Frameworks verursacht, die eine eigene \textsc{PluginRegistry} verwenden. Da dieser Fehler innerhalb der Frameworks liegt, kann er im Rahmen dieses Projektes nicht behoben werden.\\
+\linebreak
+Es musste also entschieden werden, welches Framework, \textit{Spring-Fox} oder \ac{HATEOAS}, einen größeren Mehrwert für die Anwendung bringen. Da das \textit{Swagger}-Framework, wie in Kapitel \ref{sec:dependencies} bereits erklärt wurde, eine grafische Nutzeroberfläche liefert, welche sowohl die Endpunkte dokumentiert, als auch diese aufrufen kann und somit ein wichtiges Tool zum einfachen Testen darstellt, wurde das \textit{HATEOAS}-Framework aus dem derzeitigen Umfang der Arbeit entfernt. Jedoch ist es wünschenswert, das spätere Entwicklerteams die referenzierten Issues weiterhin verfolgen und die Funktion, sobald diese behoben wurden, endgültig einfügen.
+
+\section{Notification Service}
+
+Der Notification Service, der Änderungen in den Daten der \ac{REST}-Services erkennt und diese dann an die registrierten Clients weitergibt, wurde in vollem Umfang implementiert und oberflächlich getestet. Seine Funktion, die Einrichtung und die Nutzung des Services sind in Kapitel \ref{sec:notifications} ausführlich dargestellt, weshalb hier auf eine erneute Erklärung des Notification Services verzichtet wird.\\
+\linebreak
+Das ausführliche Testen dieses Services konnte aufgrund eines Funktionsfähigen Clients nicht getestet werden. Dieser wird benötigt, da sich zum Testen mindestens ein Client beim Service registrieren muss, damit dieser eine Benachrichtigung an seine Abonnenten schickt. Des weiteren wurden die Funktionen des Notification Services lediglich implementiert, jedoch nicht in die anderen Services eingebaut, da dies den Umfang der Arbeiten deutlich vergrößert hätte und somit den Umfang der gesamten Arbeit deutlich gesprengt hätte. Jedoch wurden alle benötigten Maßnahmen ergriffen, um eine spätere Einbindung der Benachrichtigungsfunktionalitäten in die anderen Microservices weitgehend zu erleichtern. 

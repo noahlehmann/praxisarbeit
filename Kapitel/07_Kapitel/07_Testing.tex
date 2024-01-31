@@ -1,0 +1,381 @@
+\chapter{Testing}
+\label{sec:test}
+
+Wie in jedem Software Projekt wurden auch im Falle des Prototypen der neuen Hochschul-\ac{App} Tests durchgeführt. Diese ermöglichen es, unvorhergesehene Fehler oder Sicherheitslücken im Vornherein zu einem gewissen Grat auszuschließen. Um Microservices in \textit{Spring} zu Testen reichen zwei Arten von Tests, Integrationstests und Unit-Tests. Integrationstests dienen dazu, verschiedene voneinander abhängige Komponenten eines komplexen Systems im Zusammenspiel zu testen. Wichtig ist hierbei, dass manche Komponenten integriert werden müssen, also werden fehlende Module simuliert und andere Komponenten werden gleichzeitig zusammengefügt und in das zu testende System integriert. In Unit-Tests hingegen werden lediglich die Einzelteile des Systems isoliert auf ihre korrekte Funktionalität geprüft.\\
+\linebreak
+Die Test-Frameworks für Integrationstests und Unit-Tests stellt \textit{Spring Boot} mit dem Framework \textit{sping-boot-starter-test} zu Verfügung. Dieses muss lediglich über eine Maven-Dependency in das Projekt eingefügt werden. Außerdem muss noch eine \textit{H2}-Datenbank als \textit{Maven}-Dependency eingefügt werden. Eine \textit{H2}-Datenbank ist eine In-Memory Datenbank. Diese wird für das Testen des Datenschicht benötigt und wurde bereits ausführlicher im Kapitel \ref{sec:environments} beleuchtet.\\
+\linebreak
+Da bei vielen Software Projekten die maximal mögliche Testabdeckung erreicht werden muss, werden dort in der Regel unzählige Stunden und Ressourcen in den Testvorgang investiert. Da dies den Rahmen dieser Arbeit deutlich sprengen würde werden nicht alle Schichten der Gesamtsoftware getestet. Um dennoch eine möglichst große Wahrscheinlichkeit zu erreichen, alle groben Fehler eliminiert zu haben, werden sowohl die Serviceschicht, die Controller-Schicht als auch die Util Klassen getestet.\\
+\linebreak
+Im folgenden werden nun nicht alle Testfälle angeführt, da dies oft redundante Fälle sind, die sich nur in Details unterscheiden. Stattdessen wird von jeder Art der Tests ein Fall exemplarisch erläutert und genauer betrachtet. Allgemein gilt für alle Testfälle, dass die Annotation \textsc{@RunWith(SpringRunner.class)} an die Testklasse angehängt werden muss, damit das \textit{Spring Boot} Framework eine Verbindung zu den Funktionen des Test-Framework \textit{JUnit} aufbauen kann.
+
+\section{Controller Tests}
+
+Klassische Unit-Tests können an Controller-Klassen nicht angewendet werden. Diese bilden einen Sonderfall, denn sie behandeln im Laufe der Anwendung Anfragen mit dem \ac{HTTP}-Protokoll, reichen diese an die Serviceschicht weiter und liefern lediglich eine Antwort an den aufrufenden Client. Hierbei ist es also notwendig, dass das \textit{Spring Boot} Framework die nötige \ac{HTTP}-Unterstützung bereitstellt. Hierbei geht es konkret um die Funktionen zur Serialisieren und Deserialisieren von Eingabeparametern, die durch die Annotations \textsc{@RequestBody},\textsc{@PathParam} und \textsc{@PathVariable} markiert sind und durch die Annotation \textsc{@Valid} validiert werden müssen\autocite[][]{controller_test}.\\
+\linebreak
+Des weiteren werden alle benötigten Abhängigkeiten oder Beans bei den Tests ignoriert, man kann sogar so weit gehen und die Autokonfiguration des Controllers durch die Annotation \textsc{@WebMvcTest(Controller.class)} verhindern, wenn dies gewünscht ist. So können alle benötigten Konfigurationen simuliert werden. Auch das Starten des Servers kann ausgespart werden, wenn die Test-Klasse mit \textsc{@MockMvc} annotiert wurde. Dies spart wertvolle Zeit und Rechenressourcen. Das Deserialisieren von Objekten, die den Austausch von Daten über die \ac{HTTP}-Schnittstelle simulieren sollen, wird durch sogenannte \textit{ObjectMapper} realisiert.\\
+\linebreak
+\newpage
+Ein Beispielhafter Test wird im folgenden anhand des Tests für den Controller der Mensa-Informationen dargestellt.
+
+\begin{lstlisting}[caption={Basis Initialisierung für Controller Tests}, commentstyle=\color{green},]
+@RunWith(SpringRunner.class)
+@WebMvcTest(DishController.class)
+class DishControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @MockBean
+    private DishService dishService;
+
+    //Tests
+}
+\end{lstlisting}
+
+Generell ist der Controller für das Routen der Anfragen zuständig. Folgende Punkte sind hierbei wichtig für die Tests\autocite[][]{controller_test}:
+%Quelle REf: (https://reflectoring.io/spring-boot-web-controller-test/)
+
+\begin{itemize}
+\item Verifizierung einer gültiger HTTP-Anfrage
+\item Verifizierung der Parameter Serialisierung einer \ac{HTTP}-Anfrage (RequestBody, PathParam und PathVariable)
+\item Gültigkeitsprüfung der Parameter
+\item Verifizierung des Aufrufs der Business Logik
+\end{itemize}
+
+Alle anderen Szenarien werden in anderen Schichten behandelt, denn wie bereits erwähnt ist der Controller nur für das Routen zuständig und das Ziel ist hierbei lediglich die Abdeckung aller \ac{REST}-\acp{URL} des Controllers.
+
+\subsection*{Verifizierung einer HTTP-Anfrage}
+
+Es wird getestet, ob die aufgerufene Ressource mit der passenden \ac{HTTP}-Methode und einem gültigen Input funktioniert (Pfad Abdeckung).
+
+\newpage
+\begin{lstlisting}[caption={Gültige Anfrage Test}, commentstyle=\color{green},]
+@Test
+public void verifyValidRequest() throws Exception {
+  mockMvc.perform(get("/menu/{id}", 42L))
+          .andExpect(status().isOk());
+}
+\end{lstlisting}
+
+Es wird stets erwartet, dass die Ressource den Status 200 zurück gibt.
+
+\subsection*{Verifizierung der Parameter Serialisierung}
+
+Es wird getestet, ob die übergebenen Parameter an die Ressource in das gewünschte Java-Object umgewandelt werden können und wie sich die Ressource bei fehlenden Parametern Verhält.\\
+\linebreak
+\textbf{Fall 1}: Bei einem falschen Parameter Typ sollte die Ressource mit dem Internal Error 12 und einem \ac{HTTP}-Status 400 Bad Request antworten (z.B. String anstatt von Int). 
+
+\begin{lstlisting}[caption={Falscher Typ Test}, commentstyle=\color{green},]
+@Test
+public void wrongParamType() throws Exception {
+  //get request (id as string instead of long)
+  MvcResult mvcResult = mockMvc.perform(get("/menu/{id}", "test"))
+          .andExpect(status().isBadRequest())
+          .andReturn();
+
+  //current response
+  String response = mvcResult.getResponse().getContentAsString();
+
+  //expected response (internal error code 12)
+  InternalErrorPattern expectedResponse = new InternalErrorPattern(UNEXPECTED_FORMAT_CODE, UNEXPECTED_FORMAT_MSG);
+
+  //comparison
+  assertThat(response)
+          .containsIgnoringCase(objectMapper
+          .writeValueAsString(expectedResponse));
+
+    }
+\end{lstlisting}
+
+\textbf{Fall 2}: Es werden nicht alle geforderten Parameter an die Ressource übergeben. Die Ressource soll mit dem Internal Error 13 und einem \ac{HTTP}-Status 400 Bad Request antworten.
+
+\begin{lstlisting}[caption={Fehlende Parameter Test}, commentstyle=\color{green},]
+@Test
+public void noRequestBody() throws Exception {
+  //patch request (missing body param)
+  MvcResult mvcResult = mockMvc.perform(patch("/menu/{id}", 42L)
+          .contentType("application/json"))
+          .andExpect(status().isBadRequest())
+          .andReturn();
+
+  //current response
+  String response = mvcResult.getResponse().getContentAsString();
+
+  //expected response (internal error code 13)
+  InternalErrorPattern expectedResponse = new InternalErrorPattern(UNEXPECTED_COUNT_OF_PARAM_CODE, UNEXPECTED_COUNT_OF_PARAM_MSG);
+
+  //comparison
+  assertThat(response)
+          .containsIgnoringCase(objectMapper
+          .writeValueAsString(expectedResponse));
+}
+\end{lstlisting}
+
+\subsection*{Gültigkeitsprüfung der Parameter}
+
+Für die Übergabeparameter des Typs \textit{RequestBody}, \textit{PathParam} und \textit{PathVariable} können Regeln definiert werden. Die möglichen Regeln sind:
+
+\begin{table}[H]
+\begin{center}
+  \begin{tabular}{| l | l |}
+
+\hline
+\rowcolor{Gray}
+\textcolor{white}{\textbf{Annotation}} & \textcolor{white}{\textbf{Definition}} \\
+
+\hline
+\rowcolor{LGray}
+@NotNull						& Variable darf nicht null sein						\\
+\hline
+@AssertTrue						& Variable muss true sein 	\\
+\hline
+\rowcolor{LGray}
+@Size							& Minimale und Maximale Länge einer Variable. \\
+\rowcolor{LGray}				& Kann bei String, Collection, Map oder Array \\
+\rowcolor{LGray}				& verwendet werden \\
+\hline
+@Min							& Minimale Länge einer Variable	\\
+\hline
+\rowcolor{LGray}
+@Max							& Maximale Länge einer Variable \\
+\hline
+@Email							& Variable muss gültigen Email Format beinhalten \\
+\hline
+\rowcolor{LGray}
+@NotEmpty						& Variable darf nicht leer oder null sein. \\
+\rowcolor{LGray}				& Kann bei String, Collection, \\
+\rowcolor{LGray}				& Map oder Array verwendet werden \\
+\hline
+@NotBlank						& Variable darf nicht null sein oder \\
+								& nur Leerzeichen beinhalten. Kann nur \\
+								& bei Text Variablen verwendet werden 	\\
+\hline
+\rowcolor{LGray}
+@Positive oder 					& Variable muss positive oder \\
+\rowcolor{LGray}@PositiveOrZero	& positive inklusiv 0 Werte enthalten\\
+\hline
+@Negative oder 					& Variable muss negative oder \\
+@NegativeOrZero					& negative inklusiv 0 Werte enthalten\\
+\hline
+\rowcolor{LGray}
+@Past oder 						& Variable muss in der Vergangenheit \\
+\rowcolor{LGray}@PastOrPresent	& oder in der Gegenwart liegen. Kann nur \\
+\rowcolor{LGray}				& bei Datum Variablen verwendet werden 	\\
+\hline
+@Future oder 					& Variable muss in der Zukunft oder in \\
+@FutureOrPresent				& der Gegenwart liegen. Kann nur bei \\
+								&Datum Variablen verwendet werden \\
+\hline
+
+\end{tabular}
+  \end{center}
+\caption[Validation Rules]{Validation Rules}
+\label{tab:lastenheft}
+\end{table}
+
+Diese Regeln reduzieren das Sicherheitsrisiko und verhindern unerwartete Fehler beim Ausführen des Services. Außerdem können bei den Parameter Grenzwerte festgelegt werden. Beispielsweise können so Attribute mit Minimal- und Maximalwerten definiert werden. Es kann auch definiert werden, ob \textsc{null}-Werte akzeptiert werden, die Werte positiv sein müssen oder ob Whitespaces erlaubt werden. Für die Einhaltung der Regeln können ebenfalls Nachrichten definiert werden, die dem Client bei einem Fehler signalisieren, was er falsch gemacht hat. Ein Attribut kann auch mehr als eine Regel haben, die sie definiert. Wird eine dieser Regeln verletzt, so wird eine Exception mit dem Internal Error 14 und dem \ac{HTTP}-Status 400 Bad Request geworfen. Das Aktivieren einer solchen Validierung wird über die Annotation \textsc{@Validated} initiiert, mit welcher die Controller Klasse beschriftet sein muss.
+
+\begin{lstlisting}[caption={Validierung Aktivieren}, commentstyle=\color{green},]
+@RestController
+@Validated
+public class DishController {
+...
+}
+\end{lstlisting}
+
+\textit{PathParam} und \textit{PathVariable} Variablen können direkt im Controller mit den Validierungsregeln annotiert werden.
+
+\begin{lstlisting}[caption={Validierung einer PathVariable}, commentstyle=\color{green},]
+@GetMapping("/{id}")
+public ResponseEntity<DishTO> getDish(
+  @PathVariable("id")
+  @Positive(message = "ID must be a positive value")
+  @Max(value = Long.MAX_VALUE, message = "ID is to long") Long id){dish
+    ...
+}
+\end{lstlisting}
+
+Für \textit{RequestBody} Objekte wird die Validerung mit der Annotation \textsc{@Valid} aktiviert und die Validierungsregeln im passenden Transfer Objekt definiert.
+
+\newpage
+\begin{lstlisting}[caption={Validierung von RequestBody}, commentstyle=\color{green},]
+@PatchMapping("/{id}")
+public ResponseEntity<DishTO> changeDish(
+  @Valid @RequestBody DishTO dishTO) {
+    ...
+}
+
+public class DishTO {
+
+  @NotNull(groups = OnPatchValidation.class, message = "ID is required for updating the resource")
+  @Positive(message = "ID must be a positive value")
+  @Max(value = Long.MAX_VALUE, message = "ID is to long")
+  private Long id;
+
+  @NotNull(message = "Date is required")
+  private LocalDate date;
+
+  @NotBlank(message = "Category is required")
+  private String category;
+
+  @NotEmpty(message = "Prices are required")
+  private HashMap<String, Double> prices;
+
+  ...
+}
+\end{lstlisting}
+
+Werden die Validierungsregeln vom Client nicht eingehalten wird ein \ac{HTTP}-Error 400 mit der Nachricht der jeweiligen Regeln an den Client weitergeleitet. Dies kann bei Tests geprüft werden. 
+
+\begin{lstlisting}[caption={Parameter Regeln Test}, commentstyle=\color{green},]
+@Test
+public void ParamRuleViolation() throws Exception {
+  //get request (id is negative but must be positive value)
+  mockMvc.perform(get("/menu/{id}", -12L))
+          .andExpect(status().isBadRequest());
+}
+\end{lstlisting}
+
+\subsection*{Verifizierung des Aufrufs der Business Logik}
+
+Beim Aufruf einer Ressource sollte sichergestellt werden, dass die Methode der Business Logik aus der Service Schicht, an die die Bearbeitung delegiert wird, nur maximal einmal oder gar nicht aufgerufen wird und dass keine weiteren Aktionen mit der Business Logik erfolgen.
+
+\begin{lstlisting}[caption={Verifizierung der Business Logik}, commentstyle=\color{green},]
+...
+//Method in Service must be called only once from Controller
+Mockito.verify(dishService, times(1)).getDish(anyLong());
+//There is no interaction more allowed with this Service
+Mockito.verifyNoMoreInteractions(dishService);
+...
+\end{lstlisting}
+
+\section{Service Tests}
+
+Durch Controller Tests wird zwar sichergestellt, dass die Business Logik mit gültigen Parametern aufgerufen wird, aber nicht, ob der Inhalt dieser Parameter fachlich korrekt und somit verwendbar ist. Hierfür muss die Pfadabdeckung der zu testenden Business Logik gewährleistet werden. Das bedeutet, dass beim Aufruf einer Methode mit bestimmten Parametern auch der gewünschte Programmpfad abgedeckt wird. Dafür gibt es im Test Framework die Methoden \textsc{when()} und \textsc{then()}. Ähnlich wie in der Controller Schicht ist hierbei auch zu beachten, dass die Service Schicht bei der Verarbeitung der Anfragen abhängig von den Daten ist, die die darunter liegende Persistenz-Schicht liefert. Um die benötigten Beans zu simulieren bietet das \textit{Spring} Framework die Annotation \textsc{@MockBean}.\\
+\linebreak
+Um die zu testende Methode in der Service Schicht auch aufrufen zu können, muss die Klasse, in der sie definiert ist, als Bean zur Verfügung gestellt werden. Hierbei wird - wie in den eigentlichen Klassen - die Annotation \textsc{@Autowired} verwendet. Wie in Kapitel \ref{sec:annotations} bereits erklärt wurde wird die Implementation der Bean, die injiziert werden soll, durch die \textit{Spring}-Konfiguration bereitgestellt. Diese ist bei Testklassen jedoch nicht verfügbar, weshalb zusätzlich die Annotation \textsc{TestConfiguration} benötigt wird. Durch diese Annotation können die benötigten Abhängigkeiten manuell bereitgestellt werden. Die konkrete Verwendung sieht dann wie folgt aus:
+
+\newpage
+\begin{lstlisting}[caption={Basis Initialisierung für Service Tests}, commentstyle=\color{green},]
+@RunWith(SpringRunner.class)
+public class MensaServiceImplTest {
+  @TestConfiguration
+  static class MensaServiceImplTestContextConfiguration {
+    @Bean
+    public MensaService mensaService() {
+      return new MensaServiceImpl();
+    }
+  }
+  @Autowired
+  private MensaService mensaService;
+  @MockBean
+  private MensaDao mensaDao;
+}
+\end{lstlisting}
+
+\textbf{Fall 1}: Ein richtiges Verhalten testen. Hierbei wird die Businesslogik mit korrekten Parametern aufgerufen, wobei getestet wird, ob darauf die Persistenz Schicht aufgerufen ist, insofern dies erwünscht ist.
+
+\begin{lstlisting}[caption={Testen von richtigen Verhalten}, commentstyle=\color{green},]
+@Test
+public void whenValidId_thenReturnValidValue(){
+  //Simulate expected JPA call
+  //When Logic call method with ID that exists
+  when(mensaJPA.findById(1L))
+          .thenReturn(Optional.ofNullable(dishDO));
+  DishTO expectedValue = DishTO.createTOfromDO(dishDO, null);
+  //Then return dish with that ID
+  DishTO responseValue = dishService.getDish(1L);
+  assertThat(responseValue.toString())
+          .isEqualTo(expectedValue.toString());
+}
+\end{lstlisting}
+
+\textbf{Fall 2}: Ein falsches Verhalten testen. Die Business Logik wird inkorrekt aufgerufen, wobei eine bestimmte Exception erwartet wird. 
+
+\newpage
+\begin{lstlisting}[caption={Testen von Fehlverhalten}, commentstyle=\color{green},]
+@Test
+public void whenNotValidId_thenReturnClientException(){
+  //Simulate clientException
+  //When Logic call method with ID that not exists
+  when(mensaJPA.findById(2L)).thenReturn(null);
+  //Then return ClientException
+  Throwable exception = catchThrowable(() -> {
+          dishService.getDish(2L);
+  });
+  assertThat(exception)
+          .isInstanceOf(ClientException.class);
+}
+\end{lstlisting}
+
+\section{Persistenz Tests}
+
+Anders als bei den darüber liegenden Schichten ist es nicht notwendig, die Persistenz-Schicht ausgiebig zu testen, da der Großteil ihrer Funktionen durch das \textit{Spring Data \ac{JPA}} Framework bereitgestellt wird. Die eigentlichen Aufrufe an die physische Datenquelle werden deshalb nicht getestet. Dennoch gibt es Teile der Persistenz, die manuell erstellt wurden, um eine höhere Flexibilität zu erreichen. Konkret sind das die sogenannten \textit{Specifications}, die dem \textit{Spring} Framework beim Aufruf an die Datenquelle übergeben werden, um die gesuchte Ressource genauer zu beschreiben. Diese Spezifikationen können durchaus sehr komplex ausfallen, weshalb es ratsam ist, diese auch zu testen. Ein solcher Test könnte folgendermaßen aussehen:
+
+\begin{lstlisting}[caption={Testen von Fehlverhalten}, commentstyle=\color{green},]
+@Test
+public void validationOfFilterSpecification(){
+  //When filter contains only category types
+  MenuFilterTO filters = new MenuFilterTO();
+  filters.setCategories("Maindish, Dessert");
+  Specification<DishDO> filterSpecification = FilterSpecification.getSpecification(filters);
+  List<DishDO> responseValue mensaJPA.findAll(filterSpecification)
+  //Then return only dishes with given category types
+  assertThat(responseValue)
+          .isNotEmpty().hasSize(4).extracting("category")
+          .containsOnly("maindish", "dessert");
+}
+\end{lstlisting}
+
+Um die Spezifikationen testen zu können, wird die Annotation \textsc{@DataJpaTest} benötigt. Diese kümmert sich um die Konfiguration der benötigten \textit{H2}-Testdatenbank, \textit{Spring Data}, \textit{Hibernate} und des Loggers, der die \ac{SQL}-Statements loggt. Die \textit{H2}-Datenbank wird benötigt, um beim simulierten Aufruf an die Datenbank die benötigten Daten zurückliefern zu können. Um diese Daten dann aus der \textit{H2} Datenbank aufrufen zu können, wird ein \textit{TestEntityManager} benötigt, der die Methoden bereitstellt, die im eigentlichen Programmfluss vom \textit{Spring Data \ac{JPA}} Framework zur Verfügung gestellt werden\autocite[][]{spring-boot-testing}.
+
+%referenziert https://www.baeldung.com/spring-boot-testing
+\begin{lstlisting}[caption={Testen von Fehlverhalten}, commentstyle=\color{green},]
+@RunWith(springRunner.class)
+@DataJpaTest
+public class MensaJPATest {
+  @Autowired
+  private TestEntityManager entityManager;
+  @Autowired
+  private MensaJPA mensaJPA;
+}
+\end{lstlisting}
+
+Die Konfiguration der \textit{H2}-Datenbank wird durch die im folgenden gezeigte \textsc{setUp()} Methode durchgeführt. Diese ist mit der Annotation \textsc{@Before} markiert, was aussagt, dass sie vor jeder Test-Methode aufgerufen wird.
+
+%referentiert StA Testen.pdf liegt in Literatur verzeichnis
+\begin{lstlisting}[caption={Testen von Fehlverhalten}, commentstyle=\color{green},]
+@Before
+public void setUp () {
+  List<DishDO> items = new ArrayList<>(...);
+  entityManager.persistAndFlush(items);
+}
+\end{lstlisting}
+
+\section{Funktionstests}
+
+Im Package \textit{Utils} sind einige Klassen und Funktionen hinterlegt, welche nicht zur eigentlichen Logik der Anwendung zugeordnet werden können, die jedoch trotzdem im Gebrauch sind, um komplexe Aufgaben auszuführen. Diese Funktionen sind in der Regel leicht durch Unit-Tests zu testen, denn hier soll lediglich abgeglichen werden, ob sich die Klasse oder Funktion genau so verhält, wie gewünscht. Ein Beispiel für den Anwendungsfall einer Util-Funktion ist die Methode \textsc{getNextWeekDateByDay()} der Klasse \textsc{DayDateUtil.class}, welche für einen übergebenen Tag den Start der darauf folgenden Woche als Datum zurückgeben soll.
+
+\begin{lstlisting}[caption={Testen von Fehlverhalten}, commentstyle=\color{green},]
+@Test
+public void getNextWeekDateByDay() {
+    //Instance of testing object
+    DayDateUtil dayDateUtil = new DayDateUtil();
+
+    //Expected Value
+    LocalDate nextWeekDate = LocalDate.now().plusWeeks(1);
+    DayOfWeek nextWeekDateAsDay = nextWeekDate.getDayOfWeek();
+    String expectedValue = nextWeekDate
+        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+    //Res
+    String responseValue = dayDateUtil.getNextWeekDate(dayOfWeek);
+
+    //comparison
+    assertEquals(expectedValue,responseValue);
+}
+\end{lstlisting}
+
+Bei einem solchen Unit-Test reicht es vollkommen aus, eine Instanz der benötigten Klasse zu erzeugen und dann die Methode mit verschiedensten Parametern aufzurufen, um das zurückgeliefert Ergebnis mit dem erwarteten Ergebnis zu vergleichen.

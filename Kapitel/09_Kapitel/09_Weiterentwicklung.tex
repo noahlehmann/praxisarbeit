@@ -1,0 +1,114 @@
+\chapter{Weiterentwicklung}
+\label{sec:weiterentwicklung}
+
+Für eine sinnvolle und nachhaltige Pflege einer Anwendung muss von Anfang an dafür gearbeitet werden, dass spätere Entwickler einen möglichst leichten Einstieg in den Programmcode und dessen Funktionsweise finden. Das bedeutet auch, dass diese Neuanfänger möglichst viele Ressourcen haben, mit denen sie sich schnellstmöglich in den Ablauf des Programmes einarbeiten können. Ist dies nicht der Fall, so läuft man bei einem Hochschulinternen Projekt Gefahr, dass die freiwilligen Helfer des Projekts die Motivation verlieren, weiter an der Pflege und der Entwicklung der Anwendung zu arbeiten. \\
+\linebreak
+Des weiteren sollte man bei solchen Projekten, die oftmals auf freiwilliger Basis unterstützt werden oder zumindest auf der Hilfe von Studierenden beruhen, auch darauf achten, dass ständig neue Hilfe in das Projekt eingegliedert werden kann. Das Ziel dieses Kapitels ist es deshalb, Möglichkeiten zu erschließen, andere Studierende von dem Projekt zu begeistern und diesen danach auch eine solide Grundlage zu verschaffen, auf der sie dem Projekt den größtmöglichen Nutzen zukommen lassen können.
+
+\section{Pflege der Anwendung}
+\label{sec:pflege}
+
+Da diese Praxisarbeit und die dazugehörige Anwendung der web-basierten Hoch\-schul-\ac{App} im Rahmen einer Abschlussarbeit des Bachelorstudiums geschrieben werden, ist es klar, dass in Zukunft andere Entwickler an dem Projekt weiter arbeiten werden, als die, die es ins Leben gerufen haben. Deshalb werden nun die vorgeschlagenen Vorgehensweisen für neue Entwickler dargestellt, mit denen diese sich in das Projekt einarbeiten können und durch die sie anschließend auch daran weiterarbeiten können.
+
+\subsection*{Dokumentation der Anwendung}
+\label{sec:anwendung_doku}
+
+Die verschiedenen Phasen des Projektes sind im Laufe der Umsetzung dessen auch dokumentiert worden. Der Übersichtlichkeit halber wurden aber nicht alle Phasen in ein großes Projekthandbuch geschrieben, sondern in mehrere Teile aufgeteilt. Zu diesen Teilen gehören die Analyse, die eigentliche Implementierungsarbeit und die Inbetriebnahme, zu der auch die Schritte zur Weiterentwicklung gehören. Die einzelnen Dokumentationsquellen werden im folgenden kurz erläutert.
+
+\subsubsection*{Architektur}
+\label{sec:doku_architektur}
+%bachelorarbeit
+Im Rahmen der Analyse zu Beginn des Projektes der neuen Hoch\-schul\ac{App} wurden einige wichtige Designentscheidungen getroffen. Diese Beruhen auf den Erkenntnissen, die aus einer Befragung der zukünftigen Nutzergruppen gewonnen wurden und auf dem Lastenheft, das aus den funktionalen Anforderungen des Auftraggebers, des International Office und des Sprachenzentrums der Hochschule Hof entstanden ist.\\
+\linebreak
+Die Umfrageanalyse und die funktionalen Anforderungen sind in der parallel zu dieser Praxisarbeit entstandenen Bachelorarbeit gesammelt\autocite[Siehe][]{dnba}. Dort sind außerdem auch die wichtigsten Grundlagen zum Einarbeiten in die genutzten Techniken und Prinzipien sowie die Entscheidungsfindung zu genau diesen Techniken dokumentiert. Entwickler, die neu in das Projekt mit eingegliedert werden sollten diese Arbeit zuerst kurz überfliegen. Für die reine Entwicklung sind dort der Mittelteil und der Schlussteil besonders wichtig. Im Mittelteil werden die genutzten Techniken genauer erläutert und im Schlussteil wird anhand der gewonnenen Erkenntnisse die Architektur der Hoch\-schul-\ac{App} entworfen.\\
+\linebreak
+Besonders wichtig ist auch das \ac{REST}-Handbuch, das in dieser Arbeit dokumentiert ist. Hier werden alle Regeln zum Entwurf von neuen Ressourcen und zum Arbeiten mit dem \ac{HTTP} beziehungsweise mit dem \ac{HTTPS} geschildert.
+
+\subsubsection*{Implementierung}
+\label{sec:doku_implementierung}
+%praxisarbeit
+Nachdem die Analyse der Hoch\-schul-\ac{App} bereits in der im Kapitel \ref{sec:doku_architektur} beschriebenen Bachelorarbeit dokumentiert wurde, ist der Entwicklungsprozess in der dazu parallel entstandene Praxisarbeit, genau dieser Arbeit, festgehalten worden\autocite[Siehe][]{dnpa}. Wie in den vorherigen Kapiteln bereits zu erkennen war, werden hier alle verwendeten und nicht trivialen Frameworks und Techniken genauer betrachtet. Des weiteren kann man alle Spezifikationen des ersten Prototypen der web-basierten Hoch\-schul-\ac{App} dieser Arbeit entnehmen.\\
+\linebreak
+Da alles weitere bereits mehrfach in dieser Arbeit erklärt wurde, wird an dieser Stelle nicht weiter auf die Inhalte der Praxisarbeit eingegangen.
+
+\subsubsection*{Programmcode}
+\label{sec:doku_programmcode}
+%gitlab wiki/ readme
+Um einen besseren Einstieg in den Aufbau und die Funktionsweise eines Programmes zu erhalten, empfiehlt es sich oftmals nicht nur den Programmcode an sich zu betrachten, sondern auch das Programm einmal selbst zu starten und damit zu testen. Da der Programmcode selbst auf dem GitLab-Server der Hochschule Hof verfügbar ist, kann sich der Entwickler den Code lokal auf seinen eigenen Rechner herunterladen. Alle Anleitungen zum Starten der Services finden sich im dazugehörigen \textit{Readme.md}. Die Funktionsweise der einzelnen Services sind ebenfalls in \textit{Readme}-Dateien in den einzelnen Modulen des Programmcodes beschrieben.\\
+\linebreak
+Des weiteren existiert auf dem GitLab-Repository der Hochschul-\ac{App} auch ein sogenanntes \textit{Wiki}, welches genauere Einsicht in den Programmcode und die Funktionsweise der Anwendung verschafft. Dort wird auch beschrieben sein, wie der Programmcode lokal auf dem persönlichen Rechner ausgeführt werden kann. Dazu bieten die in Kapitel \ref{sec:environments} beschriebenen \textit{Environments} - auf Deutsch \textit{Umgebungen} - eine Lösung. 
+
+\subsubsection*{Endpunkte}
+\label{sec:doku_endpunkte}
+%swagger
+Da die Datenbereitstellung der Hochschul-\ac{App} über Microservices realisiert wurde sind die Endpunkte nach den \ac{REST}-Prinzipien definiert. Das bedeutet, dass jede Ressource einen eigenen \ac{URL}-Pfad besitzt, über den sie aufgerufen werden kann. Jede Ressourcenanfrage benötigt doch auch einige Parameter, um genaue Daten liefern zu können. Dies können zum Beispiel Suchparameter, Authentifizierungsdaten oder Filteranweisungen sein. Da diese Parameter sich aber zwischen den Ressourcen unterscheiden, sind die Endpunkte durch \textit{Swagger-Files} dokumentiert worden. Genaueres kann dazu in Kapitel \ref{sec:microserviceswagger} gelesen werden.\\
+\linebreak
+Der genaue Zugriff auf diese Files und die dazu generierten, interaktiven grafischen Oberflächen ist in den \textit{Readme}-Dateien der einzelnen Microservices hinterlegt. Die grafischen Oberflächen können nicht nur zur Spezifikation der einzelnen Endpunkte genutzt werden, sie bieten auch die Funktion, echte Anfragen an die Endpunkte zu stellen, ohne die dazugehörige \ac{URL} händisch eingeben zu müssen.
+
+
+\subsection*{Quellcodeverwaltung}
+\label{sec:quellcodeverwaltung}
+
+Wie bereits in Kapitel \ref{sec:git} angesprochen wurde, wird für das Projekt das Versionverwaltungstool \textit{git} verwendet. Die genaue Nutzung kann dazu ebenfalls in Kapitel \ref{sec:git} gelesen werden. Das GitLab-Repository der Hochschul-\ac{App} beinhaltet somit stets den aktuellen Code des Programmes - inklusive der älteren Versionen. Möchte ein Studierender oder externer Helfer somit am Quellcode der Anwendung arbeiten, so braucht er zuerst ein Konto oder gültige Zugangsdaten für den GitLab-Server der Hochschule.\\
+\linebreak
+Danach muss er vom Verwalter des Hochschul-\ac{App}-Repositories zur passenden Entwickler Gruppe hinzugefügt werden. Ist das dann erledigt, so kann er den Programmcode \textit{clonen}, also das Repository lokal auf seinen Rechner laden und die Anwendung dann starten. Danach kann er Änderungen ausführen und diese dann wieder in das Repository hochladen. Auch hierzu wird auf Kapitel \ref{sec:git} verwiesen, wo die genaue Vorgehensweise dokumentiert ist.\\
+\linebreak
+Anzumerken ist jedoch auch, dass alle Studierenden der Hochschule Hof mit einem Zugang zum GitLab-Server der Hochschule den Code einsehen können und auch Änderungsvorschläge beisteuern können. Genaueres hierzu wird in den folgenden Kapiteln \ref{sec:openource}, \ref{sec:bugbounty} und \ref{sec:codecontributions} erläutert.
+
+\section{Programmcode Veröffentlichung}
+\label{sec:openource}
+
+Die Veröffentlichung des Quellcodes einer Anwendung birgt Anfangs zwar einige Risiken, bringt aber auf lange Sicht gesehen einige Vorteile mit sich. Bei der Überlegung, ob der Programmcode der web-basierten Hochschul-\ac{App} öffentlich oder zumindest Hochschulintern verfügbar sein soll, sind folgende Punkte mit eingeflossen:\\
+
+\begin{itemize}
+\item \textbf{Öffentliche Darstellung von Sicherheitslücken}\\
+Da der Programmcode von jedermann einsehbar ist, kann es sein, dass in der Prototyp Phase, aber auch zu späteren Versionen der Anwendung, Sicherheitslücken gefunden werden. In den falschen Händen angekommen können diese Sicherheitslücken auch ausgenutzt werden. Dies schließt die Veröffentlichung des Quellcodes außerhalb der Hochschule selbst aus. Dennoch können Interessierte Studierende diese Sicherheitslücken finden und melden, wodurch sie schneller behoben werden können. Lösungen zum Melden solcher Lücken sind in Kapitel \ref{sec:bugbounty} zu finden.
+
+\item \textbf{Eigenständige Suche nach Programmfehlern}\\
+Der große Vorteil einer Open-Source-Community ist es, dass alle Interessierten den Quellcode sehen und somit auch verbessern können. Sollte zum Beispiel ein Fehler im Ablauf gesehen werden, so kann dieser nicht nur gemeldet werden, der Finder selbst könnte sich den Code genauer ansehen und den Fehler selbst beseitigen. Die Lösung des Problems kann er als Vorschlag dann an die Entwickler schicken. Genaueres dazu wird in Kapitel \ref{sec:codecontributions} beschrieben.
+
+\item \textbf{Vorschläge zu Erweiterungen}\\
+Die aktuellsten und beliebtesten Anwendungen der heutigen Zeit bieten große Mengen an Funktionen, implementieren aber auch jeweils die gängigen Designphilosophien. Bei der Entwicklung des Prototypen der Hochschul Anwendung können dabei nicht alle diese Faktoren mit einfließen. Findet somit ein Nutzer etwas, das ihm an der Anwendung nicht gefällt, sei es in der Datenbereitstellung oder im dazu entwickelten Frontend, dann kann er dafür eine Lösung implementieren und diese dann den Entwicklern zur Verfügung stellen\footnote{Siehe Kapitel \ref{sec:codecontributions}}. Diese können dann in Absprache mit dem Auftraggeber entscheiden, ob die Lösung sinnvoll ist, sie gegebenenfalls verbessern oder anpassen und sie dann in der nächsten Version der Hochschul-\ac{App} mit veröffentlichen. So haben die Nutzer ein deutlich besseres Verhältnis zur Anwendung, da sie wissen, dass sie noch in Bearbeitung ist und dass sie selber einen Unterschied machen können.
+\newpage
+\item \textbf{Weiterbildung für Interessierte}\\
+Die web-basierte Hochschul-\ac{App} wurde aufwändig entwickelt und so gestaltet, dass sie mit den neuesten Techniken und Frameworks arbeitet\footnote{Siehe Kapitel \ref{sec:technologien}}. Somit kann der Programmcode für viele auch nur dafür dienen, sich ein Bild über die Funktionsweise der Techniken zu machen. Außerdem kann der Quellcode so auch als Beispiel für Themenverwandte Vorlesungen dienen.
+\end{itemize}
+
+Betrachtet man all diese Punkte, so ist klar festzustellen, dass die Offenlegung ein Risiko mit sich bringt, da alle Sicherheitslücken frei einsehbar sind. Dafür wurden aber weiterführende Maßnahmen ergriffen, die die Manipulation der Software und des Servers auf dem sie läuft erschwert und Angriffe auf den Angreifer zurückführen lassen. Dazu kann in Kapitel \ref{sec:apikeys} mehr gelesen werden. Außerdem liegt es im Interesse der Studierenden, eine zuverlässige Anwendung zu haben, die ihnen den Alltag an der Hochschule vereinfacht. Die Vorteile, die bei der Veröffentlichung des Quellcodes angebracht wurden, überwiegen die Sicherheitsbedenken in diesem Fall. Sie ermöglichen es den interessierten und neugierigen Studierenden, sich in das Projekt einzufinden und mit der Software zu identifizieren. So weckt das open-source Projekt \textit{web-basierte Hochschul-\ac{App}} das Interesse seiner Nutzer. Der Code wird selbstverständlich aus oben genannten Gründen nur für Studierende der Hochschule Hof oder Entwickler mit einem Zugang zum GitLab-Server der Hochschule Hof veröffentlicht.  
+
+\section{Verteilung von Zugangsdaten}
+\label{sec:apikeys}
+
+Wie aus den beiden Bachelorarbeiten, die parallel zum Projekt der \textit{web-basierten Hochschul-\ac{App}} angefertigt wurden, hervorgeht, besteht die Datenbereitstellung aus einem \ac{REST}-Backend, welches die Daten über \ac{HTTP}-Zugriffe zugänglich macht\autocites[][]{dnba}[][]{andreasba}. Selbstverständlich sind die Endpunkte jedoch gegen unautorisierten Zugriff abgesichert. Jede Anfrage benötigt einen gültigen \ac{API}-Schlüssel, um vom Server überhaupt bearbeitet zu werden.\\
+\linebreak
+Diese \ac{API}-Schlüssel regeln nicht nur die Zugriffsberechtigung auf die Endpunkte im Allgemeinen, sie unterscheiden zusätzlich auch, welche Aktionen ein Anwender ausführen darf und welche nicht. So kann ein Administrator der Anwendung und der Daten beispielsweise einen speziellen Schlüssel nutzen, der ihm das Ändern und Löschen von Daten über die Schnittstelle erlaubt. Ein normaler Nutzer hingegen - oftmals ist ein solcher Nutzer keine konkrete Person, sondern eine Anwendung - hätte hingegen nur einen Schlüssel, mit dem er nur Daten lesen kann.\\
+\linebreak
+Diese \ac{API}-Schlüssel sollten an alle Interessierten Studierende weitergegeben werden, denn sie bieten Nutzern die Möglichkeit, eine eigene Anwendung zu schreiben, die die Daten der Hochschul-\ac{App} verarbeiten. So können Studierende die Daten auch dann sinnvoll nutzen, wenn sie die dazu entwickelte grafische Oberfläche nicht nutzen wollen oder können.\\
+\linebreak
+Selbstverständlich haben solche \ac{API}-Schlüssel gewisse Restriktionen. Sie haben unter anderem nur eine gewisse Lebensdauer. Außerdem kann der Schlüssel-Ad\-min\-istrator jederzeit Schlüssel für ungültig erklären, wenn sie unsauber genutzt werden. Das kann unter anderem auch automatisiert erkannt werden. Des weiteren können die Schlüssel bei Herausgabe an die Studierenden mit deren Namen oder Matrikelnummer verknüpft werden. Das ermöglicht eine Rückverfolgung, falls die Schnittstelle unsachgemäß genutzt wurde.\\
+\linebreak
+Abschließend kann man sagen, das die Herausgabe von \ac{API}-Schlüsseln eine sinnvolle Herangehensweise ist. So wird das Interesse der Studierenden an der Anwendung gefördert, was die Weiterentwicklung nach der Fertigstellung des Prototypen deutlich einfacher macht und auch gerechtfertigt. Auch für Lehrzwecke bieten sich solche Schlüssel an.
+
+\section{Problemfindung und Beseitigung}
+\label{sec:bugbounty}
+
+Um eine einfache Fehlerbeseitigung zu ermöglichen, sollte den Nutzern ermöglicht werden, Fehler, die ihnen beim Nutzen der Anwendung aufgefallen sind, über verschiedene Wege an die Entwickler weiterzureichen. Ein klassischer Weg hierbei ist die Möglichkeit dem Entwicklerteam eine Mail zukommen zu lassen, die den Fehler beschreibt und auch einen Weg formuliert, wie man ihn rekonstruieren kann. Das ist jedoch oft sehr ungenau, außerdem können die Entwickler so die gefundenen Fehler nur schwer organisieren. Diese Herangehensweise sollte dringend implementiert werden, da es Nutzer gibt, die den technischen Hintergrund nicht besitzen, einen Fehler auf andere Arten zu berichten.\\
+\linebreak
+Für die technischer versierten Nutzer der \ac{App} soll es möglich sein, Issues auf der \textit{gitLab} Seite der Anwendung zu erstellen. Dabei muss der Fehler klar beschrieben werden, worauf dem Fehler eine Fehlernummer zugeordnet wird. Über diese Ticketnummer kann der Entwickler dann einen Source Code Branch erstellen, in dem er den Fehler behebt und testet, worauf er den Branch dann wieder in den Hauptbranch der Anwendung merged. Im nächsten Release ist der Fehler dann nicht mehr in der Anwendung zu finden. Der offene Fehler kann somit geschlossen werden.\\
+\linebreak
+Nutzer, die Erfahrung im Bereich der Programmierung haben können dank des open-source Ansatz ebenfalls den Source Code auf ihren persönlichen Computer laden und den Fehler selbst beheben. Die Lösung kann dann als Pull-Request auf GitLab hochgeladen werden. Die Entwickler der Anwendung können die Lösung dann prüfen, gegebenenfalls anpassen und dann in die Anwendung übernehmen.
+
+\section{Neue Funktionen}
+\label{sec:feature_requests}
+
+Ähnlich wie bei der Fehlersuche soll es technisch versierten und an der Anwendung interessierten Studierenden der Hochschule Hof möglich sein, neue Funktionen für die Anwendung vorzuschlagen. Hierfür gibt es analog zur Fehlersuche wieder drei Lösungsansätze. Der klassische Weg bleibt hierbei wieder die E-Mail an das Entwicklerteam. Da hier die gleichen Probleme wie bei der Fehlersuche auftreten soll deshalb nicht weiter auf diese Möglichkeit eingegangen werden, auch wenn sie definitiv in den Umfang der Pflege der Anwendung aufgenommen werden soll. Die zwei weiteren Möglichkeiten, neue Features vorzuschlagen, werden im folgenden betrachtet.
+
+\subsection*{Feature Requests}
+\label{sec:featurerequests}
+
+Ähnlich wie bei der Fehlersuche können Studierende, die verstehen, wie das GitLab Repository der Hochschule Hof funktioniert, einen sogenannten Issue erstellen, in dem sie das gewünschte Feature ausführlich beschreiben. Entwickler können dann bei Bedarf durch die Sammlung der Issues gehen und Features für neue Releases suchen. Das läuft analog zur Fehlersuche ab und muss deswegen nicht nochmals genauer beschrieben werden.
+
+\subsection*{Code Contributions}
+\label{sec:codecontributions}
+
+Besonders wünschenswert ist ein großes Interesse der Studierenden, besonders aus den technischen Studiengängen, am Verlauf und den Funktionen der neuen Hoch\-schul-\ac{App}. Schließlich profitieren alle Studierenden vom Engagement der Entwickler an der Anwendung. Da nicht alle Studierenden dauerhaft die Ressourcen haben, um Zeit in die Entwicklung der \ac{App} zu investieren, soll es die Möglichkeit geben, eigene Funktionen zu implementieren und die Lösungen dann im Repository des GitLab Servers hochzuladen. Solche Vorschläge werden allgemein als Code Contribution bezeichnet und dienen als Möglichkeit, die Entwickler in ihrer Arbeit zu unterstützen und auch eigene Einflüsse in das Produkt einfließen zu lassen. Interessierte Studierende können im GitLab Repository den aktuellen Source Code der Anwendung auf ihre Systeme herunterladen und dann nach eigenem Empfinden modifizieren oder erweitern. Sobald keine weiteren Änderungen mehr nötig sind können sie den Code als Pull Request im Repository hochladen. Das Entwicklerteam hat dann die Möglichkeit diesen Vorschlag zu prüfen und  gegebenenfalls anzupassen und danach in den eigentlichen Source Code zu mergen. Diese Möglichkeit der Mitarbeit soll den Studierenden die Anwendung näher bringen und ihnen klar machen, dass jeder die Möglichkeit hat, zu einer erfolgreichen und interessanten Hochschul-\ac{App} beizutragen.
